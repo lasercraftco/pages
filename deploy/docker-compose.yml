@@ -1,0 +1,89 @@
+# Pages — production stack on iMac (192.168.1.92).
+#
+# - Ships its own Postgres so it's isolated from other apps.
+# - Watchtower (already running on iMac) auto-updates these images by label.
+# - Cloudflare tunnel ingress rule routes pages.tyflix.net → host:3035.
+# - Engine mounts the SAME book-drive paths Kavita + Audiobookshelf use today,
+#   read-only. Pages does NOT move or modify files.
+
+name: pages
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pages-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pages_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "127.0.0.1:5434:5432"
+
+  engine:
+    image: ghcr.io/lasercraftco/pages-engine:latest
+    container_name: pages-engine
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: ../.env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    volumes:
+      # Read-only mounts of the existing Kavita / Audiobookshelf libraries.
+      # bootstrap.sh detects the real paths and rewrites these.
+      - ${PAGES_EBOOK_HOST_PATH:-/Users/tyler/homelab/kavita/library}:/library/ebooks:ro
+      - ${PAGES_AUDIOBOOK_HOST_PATH:-/Users/tyler/homelab/audiobookshelf/library}:/library/audiobooks:ro
+      # Persistent caches: cover art, conversion outputs, search index.
+      - pages_engine_cache:/var/lib/pages
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:8003:8003"
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8003/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  web:
+    image: ghcr.io/lasercraftco/pages-web:latest
+    container_name: pages-web
+    restart: unless-stopped
+    depends_on:
+      engine:
+        condition: service_healthy
+    env_file: ../.env
+    environment:
+      HOSTNAME: "0.0.0.0"            # Next.js IPv6-only gotcha (see Tyflix memory)
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      PAGES_ENGINE_URL: http://engine:8003
+      PAGES_ENGINE_PUBLIC_URL: /api/engine
+    ports:
+      - "3035:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  pages_pg_data:
+    name: pages_pg_data
+  pages_engine_cache:
+    name: pages_engine_cache

@@ -1,0 +1,13 @@
+{
+  "name": "Pages",
+  "short_name": "Pages",
+  "description": "Books and audiobooks, all yours.",
+  "start_url": "/library",
+  "display": "standalone",
+  "background_color": "#07050b",
+  "theme_color": "#ff2e93",
+  "icons": [
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

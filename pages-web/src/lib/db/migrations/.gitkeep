@@ -1,0 +1,2 @@
+# Drizzle generates migrations into this folder.
+# Run `pnpm drizzle:generate` to populate after schema changes.

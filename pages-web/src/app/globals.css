@@ -1,0 +1,111 @@
+@import "tailwindcss";
+@import "./brand.css";
+
+@theme {
+  --color-bg: var(--brand-bg);
+  --color-bg-2: var(--brand-bg-2);
+  --color-bg-3: var(--brand-bg-3);
+  --color-surface: var(--brand-surface);
+  --color-surface-2: var(--brand-surface-2);
+  --color-text: var(--brand-text);
+  --color-text-dim: var(--brand-text-dim);
+  --color-text-faint: var(--brand-text-faint);
+  --color-pink: var(--brand-pink);
+  --color-pink-strong: var(--brand-pink-strong);
+  --color-cyan: var(--brand-cyan);
+  --color-gold: var(--brand-gold);
+  --color-plum: var(--brand-plum);
+  --color-primary: var(--brand-primary);
+  --color-accent: var(--brand-accent);
+  --color-up: var(--brand-up);
+  --color-down: var(--brand-down);
+  --color-warn: var(--brand-warn);
+  --radius: var(--brand-radius);
+  --radius-sm: var(--brand-radius-sm);
+  --radius-lg: var(--brand-radius-lg);
+  --font-display: var(--brand-font-display);
+  --font-serif: var(--brand-font-serif);
+  --font-sans: var(--brand-font);
+}
+
+html, body {
+  background:
+    radial-gradient(circle at 12% -10%, rgba(255, 46, 147, 0.18), transparent 55%),
+    radial-gradient(circle at 88% 110%, rgba(0, 230, 255, 0.14), transparent 55%),
+    var(--brand-bg);
+  color: var(--brand-text);
+  min-height: 100dvh;
+  font-family: var(--brand-font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+* { box-sizing: border-box; }
+::selection { background: rgba(var(--brand-primary-glow), 0.35); color: var(--brand-text); }
+
+/* The wordmark / hero gradient text */
+.brand-wordmark {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--brand-font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Glass card */
+.glass {
+  background: var(--brand-glass-bg);
+  border: 1px solid var(--brand-glass-border);
+  backdrop-filter: blur(var(--brand-glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--brand-glass-blur)) saturate(140%);
+  border-radius: var(--brand-radius);
+  box-shadow: var(--brand-shadow);
+}
+.glass-strong {
+  background: rgba(26, 18, 48, 0.78);
+  border: 1px solid rgba(255, 46, 147, 0.22);
+  backdrop-filter: blur(24px) saturate(160%);
+  border-radius: var(--brand-radius-lg);
+  box-shadow: var(--brand-shadow), var(--brand-shadow-glow);
+}
+
+/* Scrollbar */
+.scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.20); }
+
+/* Reader surface (used by the in-browser ebook reader) */
+.reader-surface {
+  background: var(--reader-bg, var(--brand-bg-2));
+  color: var(--reader-text, var(--brand-text));
+}
+
+/* Cover art tile glow on hover */
+.cover {
+  border-radius: 8px;
+  box-shadow: 0 18px 40px -22px rgba(0,0,0,0.8);
+  transition: transform 250ms ease, box-shadow 300ms ease;
+}
+.cover:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 26px 50px -18px rgba(255, 46, 147, 0.4);
+}
+
+/* Pulse animation used for "currently reading" indicator */
+@keyframes brand-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+.pulse { animation: brand-pulse 2.4s ease-in-out infinite; }
+
+/* Range slider */
+input[type="range"] { -webkit-appearance: none; background: transparent; }
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px; background: rgba(255,255,255,0.12); border-radius: 4px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px;
+  background: var(--brand-primary); border-radius: 50%; margin-top: -5px;
+  box-shadow: 0 0 18px rgba(var(--brand-primary-glow), 0.6);
+}

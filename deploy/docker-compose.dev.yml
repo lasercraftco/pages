@@ -1,0 +1,26 @@
+# Override for local dev: build images, mount source, enable hot reload.
+# Used via:
+#   docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml up
+
+services:
+  engine:
+    build:
+      context: ../pages-engine
+      target: dev
+    image: pages-engine:dev
+    environment:
+      RELOAD: "true"
+      LOG_LEVEL: debug
+    volumes:
+      - ../pages-engine/app:/app/app
+
+  web:
+    build:
+      context: ../pages-web
+      target: dev
+    image: pages-web:dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ../pages-web/src:/app/src
+      - ../pages-web/public:/app/public

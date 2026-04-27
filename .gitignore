@@ -1,0 +1,34 @@
+# env / secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# js
+node_modules/
+.next/
+.turbo/
+.DS_Store
+*.log
+pnpm-debug.log*
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# ide
+.vscode/
+.idea/
+
+# local data
+data/
+*.sqlite
+*.db
+covers/
+.cache/
