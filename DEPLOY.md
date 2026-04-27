@@ -47,7 +47,7 @@ Friends can be granted `auto_approve` (direct add to Readarr) or banned from `/a
 |------------------|-----------|-------------|
 | pages-web        | 3000      | 3035        |
 | pages-engine     | 8003      | 127.0.0.1:8003 |
-| pages-postgres   | 5432      | 127.0.0.1:5434 |
+| pages-postgres   | 5432      | 127.0.0.1:5436 |
 
 The Cloudflare tunnel routes `pages.tyflix.net` → `http://localhost:3035` on the iMac.
 
