@@ -38,10 +38,14 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     volumes:
-      # Read-only mounts of the existing Kavita / Audiobookshelf libraries.
-      # bootstrap.sh detects the real paths and rewrites these.
-      - ${PAGES_EBOOK_HOST_PATH:-/Users/tyler/homelab/kavita/library}:/library/ebooks:ro
-      - ${PAGES_AUDIOBOOK_HOST_PATH:-/Users/tyler/homelab/audiobookshelf/library}:/library/audiobooks:ro
+      # Read-only mounts of the existing Kavita + Audiobookshelf libraries.
+      # bootstrap.sh detects the real paths from the running containers and
+      # rewrites these in .env. We expose three ebook subroots (books, comics,
+      # manga) so PAGES_EBOOK_ROOTS can target them all without overlap.
+      - ${PAGES_EBOOK_BOOKS_HOST_PATH:-/Volumes/Music/Books}:/library/ebooks/books:ro
+      - ${PAGES_EBOOK_COMICS_HOST_PATH:-/Volumes/Music/Comics}:/library/ebooks/comics:ro
+      - ${PAGES_EBOOK_MANGA_HOST_PATH:-/Volumes/Music/Manga}:/library/ebooks/manga:ro
+      - ${PAGES_AUDIOBOOK_HOST_PATH:-/Volumes/Music/Audiobooks}:/library/audiobooks/main:ro
       # Persistent caches: cover art, conversion outputs, search index.
       - pages_engine_cache:/var/lib/pages
     extra_hosts:

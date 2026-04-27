@@ -75,27 +75,24 @@ ok "secrets present (readarr=$([ -n "$READARR_API_KEY" ] && echo yes || echo no)
 
 bold "2. Detect existing Kavita + Audiobookshelf library paths"
 detect_from_container() {
-  local name="$1" container_path_glob="$2"
+  local name="$1" dest="$2"
   docker inspect "$name" --format '{{json .Mounts}}' 2>/dev/null \
-    | python3 -c "import json,sys,re;m=json.load(sys.stdin);g=re.compile(sys.argv[1]);print('\n'.join(x['Source'] for x in m if g.match(x.get('Destination',''))))" "$container_path_glob" \
+    | python3 -c "import json,sys;m=json.load(sys.stdin);[print(x['Source']) for x in m if x.get('Destination')==sys.argv[1]]" "$dest" \
     | head -1
 }
-EBOOK_PATHS=()
-for d in $(detect_from_container kavita '^/(books|comics|manga)$' || true); do
-  [ -n "$d" ] && [ -d "$d" ] && EBOOK_PATHS+=("$d")
-done
-[ ${#EBOOK_PATHS[@]} -eq 0 ] && EBOOK_PATHS=("/Volumes/Music/Books")
-EBOOK_PATH="${EBOOK_PATHS[0]}"
+EBOOK_BOOKS_PATH="$(detect_from_container kavita /books)"
+[ -z "$EBOOK_BOOKS_PATH" ] && EBOOK_BOOKS_PATH="/Volumes/Music/Books"
+EBOOK_COMICS_PATH="$(detect_from_container kavita /comics)"
+[ -z "$EBOOK_COMICS_PATH" ] && EBOOK_COMICS_PATH="/Volumes/Music/Comics"
+EBOOK_MANGA_PATH="$(detect_from_container kavita /manga)"
+[ -z "$EBOOK_MANGA_PATH" ] && EBOOK_MANGA_PATH="/Volumes/Music/Manga"
+AUDIO_PATH="$(detect_from_container audiobookshelf /audiobooks)"
+[ -z "$AUDIO_PATH" ] && AUDIO_PATH="/Volumes/Music/Audiobooks"
 
-AUDIO_PATHS=()
-for d in $(detect_from_container audiobookshelf '^/(audiobooks)$' || true); do
-  [ -n "$d" ] && [ -d "$d" ] && AUDIO_PATHS+=("$d")
-done
-[ ${#AUDIO_PATHS[@]} -eq 0 ] && AUDIO_PATHS=("/Volumes/Music/Audiobooks")
-AUDIO_PATH="${AUDIO_PATHS[0]}"
-
-ok "ebooks: $EBOOK_PATH"
-ok "audiobooks: $AUDIO_PATH"
+ok "ebooks/books:  $EBOOK_BOOKS_PATH"
+ok "ebooks/comics: $EBOOK_COMICS_PATH"
+ok "ebooks/manga:  $EBOOK_MANGA_PATH"
+ok "audiobooks:    $AUDIO_PATH"
 
 bold "3. Stage code under ~/homelab/pages"
 if [ "$REPO_ROOT" != "$TARGET_DIR" ]; then
@@ -141,8 +138,12 @@ update_env SMTP_HOST                  "${SMTP_HOST:-}"
 update_env SMTP_USER                  "${SMTP_USER:-}"
 update_env SMTP_PASS                  "${SMTP_PASS:-}"
 update_env SMTP_FROM                  "${SMTP_FROM:-pages@tyflix.net}"
-update_env PAGES_EBOOK_HOST_PATH      "$EBOOK_PATH"
-update_env PAGES_AUDIOBOOK_HOST_PATH  "$AUDIO_PATH"
+update_env PAGES_EBOOK_BOOKS_HOST_PATH   "$EBOOK_BOOKS_PATH"
+update_env PAGES_EBOOK_COMICS_HOST_PATH  "$EBOOK_COMICS_PATH"
+update_env PAGES_EBOOK_MANGA_HOST_PATH   "$EBOOK_MANGA_PATH"
+update_env PAGES_AUDIOBOOK_HOST_PATH     "$AUDIO_PATH"
+update_env PAGES_EBOOK_ROOTS             "/library/ebooks/books,/library/ebooks/comics,/library/ebooks/manga"
+update_env PAGES_AUDIOBOOK_ROOTS         "/library/audiobooks/main"
 chmod 600 .env
 rm -f .env.bak
 ok ".env composed"
