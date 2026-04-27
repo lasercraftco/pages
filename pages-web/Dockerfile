@@ -26,18 +26,24 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
+# Build a slim "migrate-only" node_modules tree containing just drizzle-orm + postgres
+# (the standalone server already includes them, but we want a stable, predictable
+# migration runtime path independent of Next.js code-splitting).
+RUN mkdir -p /tmp/migrate-modules \
+ && cp -R node_modules/drizzle-orm /tmp/migrate-modules/ \
+ && cp -R node_modules/postgres /tmp/migrate-modules/
 
 FROM node:${NODE_VERSION}-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 COREPACK_INTEGRITY_KEYS=0
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/src/lib/db/migrations ./migrations
-COPY --from=builder --chown=nextjs:nodejs /app/src/lib/db/migrate.ts ./migrate.ts
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/tsx ./node_modules/tsx
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/migrate.mjs ./migrate.mjs
+# Merge the slim migrate modules into whatever node_modules the standalone build copied.
+COPY --from=builder --chown=nextjs:nodejs /tmp/migrate-modules/ ./node_modules/
 USER nextjs
 EXPOSE 3000
-CMD sh -c "node ./node_modules/tsx/dist/cli.mjs ./migrate.ts && exec node server.js"
+CMD sh -c "node ./migrate.mjs && exec node server.js"
