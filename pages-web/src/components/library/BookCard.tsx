@@ -3,12 +3,15 @@
 import { motion } from "framer-motion";
 import { BookOpen, Headphones, Star } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 import { cn, formatDuration, formatPages } from "@/lib/utils";
 import type { LibraryBook } from "@/lib/library/queries";
 
 export function BookCard({ book, onOpen }: { book: LibraryBook; onOpen?: (b: LibraryBook) => void }) {
   const ratio = Math.min(1, Math.max(0, book.progress));
+  const [coverFailed, setCoverFailed] = useState(false);
+  const showCover = !!book.coverUrl && !coverFailed;
   return (
     <motion.button
       layout
@@ -19,12 +22,13 @@ export function BookCard({ book, onOpen }: { book: LibraryBook; onOpen?: (b: Lib
       className="group flex w-full flex-col text-left"
     >
       <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg shadow-[0_20px_60px_-30px_rgba(0,0,0,0.9)]">
-        {book.coverUrl ? (
+        {showCover ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={book.coverUrl}
+            src={book.coverUrl ?? undefined}
             alt={book.title}
             loading="lazy"
+            onError={() => setCoverFailed(true)}
             className="cover h-full w-full object-cover"
             style={book.coverColor ? { backgroundColor: book.coverColor } : undefined}
           />

@@ -16,6 +16,10 @@ const PUBLIC_PREFIXES = [
   "/favicon",
   "/robots.txt",
   "/sitemap.xml",
+  // Cover thumbnails are referenced from <img> tags and may load before the
+  // session cookie is established — keep them unauthenticated.
+  "/covers/",
+  "/manifest.webmanifest",
 ];
 
 export function middleware(req: NextRequest) {
