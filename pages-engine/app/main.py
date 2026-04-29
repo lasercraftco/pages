@@ -11,6 +11,7 @@ from app import __version__
 from app.config import get_settings
 from app.routes import (
     convert,
+    covers,
     export,
     file,
     health,
@@ -46,6 +47,7 @@ app.include_router(convert.router)
 app.include_router(export.router)
 app.include_router(request_route.router)
 app.include_router(share.router)
+app.include_router(covers.router)
 
 
 @app.get("/")
