@@ -30,5 +30,9 @@ venv/
 data/
 *.sqlite
 *.db
-covers/
 .cache/
+
+# Engine cover cache (PAGES_CACHE_DIR/covers). Anchored so it doesn't shadow
+# the pages-web cover-proxy route at pages-web/src/app/covers/.
+/covers/
+/pages-engine/covers/
