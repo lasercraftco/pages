@@ -105,6 +105,10 @@ export async function listBooks(userId: string, filter: LibraryFilter = {}): Pro
     filter.tag ? dsql`${books.tags} ? ${filter.tag}` : undefined,
     filter.kind === "ebook" ? dsql`coalesce(files_agg.has_ebook, false)` : undefined,
     filter.kind === "audiobook" ? dsql`coalesce(files_agg.has_audiobook, false)` : undefined,
+    // Per-user shelf membership. Books are global; only state is scoped to the user.
+    filter.status && filter.status !== "all"
+      ? dsql`coalesce(state_agg.status, 'none') = ${filter.status}`
+      : undefined,
   );
 
   const orderBy =

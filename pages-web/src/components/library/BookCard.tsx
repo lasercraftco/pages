@@ -16,7 +16,7 @@ export function BookCard({ book, onOpen }: { book: LibraryBook; onOpen?: (b: Lib
       onClick={() => onOpen?.(book)}
       whileHover={{ y: -4 }}
       transition={{ type: "spring", stiffness: 320, damping: 28 }}
-      className="group flex flex-col text-left"
+      className="group flex w-full flex-col text-left"
     >
       <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg shadow-[0_20px_60px_-30px_rgba(0,0,0,0.9)]">
         {book.coverUrl ? (
